@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "species-etiquettes"
+version = "0.1.0"
+description = "A simple PDF creation tool"
+authors = ["Lara Albrecht <laraluciaalbrecht@gmail.com>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.9"
+reportlab = "^4.4.4"
+
+[tool.poetry.scripts]
+create-pdf = "src.create_pdf:main"
+
+[tool.poetry.group.dev.dependencies]
+reportlab-stubs = "^3.6.9.post0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
