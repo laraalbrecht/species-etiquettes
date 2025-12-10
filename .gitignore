@@ -25,7 +25,3 @@ env/
 
 # Local configuration
 .env
-
-# Outputs
-output/*.pdf
-
