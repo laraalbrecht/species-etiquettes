@@ -209,6 +209,19 @@ def compute_global_font_size(c: canvas.Canvas, labels: list[LabelSpec]) -> float
     return float(name_font[1])
 
 
+def derive_bold_italic_font_name(base_name: str) -> str:
+    """Return a bold+italic/oblique variant of a base font name."""
+    if base_name.endswith(("-BoldOblique", "-BoldItalic")):
+        return base_name
+    if base_name.endswith("-Bold"):
+        return f"{base_name}Oblique"
+    if base_name.endswith(("-Oblique", "-Italic")):
+        stripped = base_name.rsplit("-", 1)[0]
+        suffix = "Oblique" if base_name.endswith("-Oblique") else "Italic"
+        return f"{stripped}-Bold{suffix}"
+    return f"{base_name}-BoldOblique"
+
+
 def build_label_specs(data: list[dict[str, str]]) -> list[LabelSpec]:
     """
     Convert CSV rows into a flat list of label specifications.
@@ -344,11 +357,8 @@ def draw_labels(output_pdf: str, csv_path: str) -> None:
 
     name_font = CONFIG["name_font"]
     name_font_name = name_font[0]
-    # Use a bold face for the main label text; if the configured font is already bold,
-    # re-use it as-is.
-    bold_name_font_name = (
-        name_font_name if name_font_name.endswith("-Bold") else f"{name_font_name}-Bold"
-    )
+    # Use a bold italic/oblique variant for taxon names to emphasize scientific names.
+    taxon_font_name = derive_bold_italic_font_name(name_font_name)
 
     global_name_font_size = compute_global_font_size(c, label_specs)
     author_font_name = author_font[0]
@@ -415,16 +425,16 @@ def draw_labels(output_pdf: str, csv_path: str) -> None:
             # Check whether the current text would fit into the inner width
             # (respecting horizontal padding). If not, shrink only for this label.
             max_text_width = (inner_w - 2 * padding_x) * 0.95
-            text_width = c.stringWidth(main_text, bold_name_font_name, label_font_size)
+            text_width = c.stringWidth(main_text, taxon_font_name, label_font_size)
             if text_width > max_text_width and text_width > 0:
                 scale = max_text_width / text_width
                 # Avoid making the font unreadably small; 4pt is a conservative floor.
                 label_font_size = max(global_name_font_size * scale, 4.0)
                 text_width = c.stringWidth(
-                    main_text, bold_name_font_name, label_font_size
+                    main_text, taxon_font_name, label_font_size
                 )
 
-            c.setFont(bold_name_font_name, label_font_size)
+            c.setFont(taxon_font_name, label_font_size)
             # Left alignment: keep the same vertical placement but align text to the
             # inner left edge, observing the horizontal padding.
             text_x = box_x + padding_x
@@ -447,7 +457,14 @@ def draw_labels(output_pdf: str, csv_path: str) -> None:
         author_text = spec["author_text"]
         if author_text:
             c.setFillColor(colors.black)
-            c.setFont(author_font_name, author_font_size)
+            # Keep the configured font size if it fits; shrink only as needed.
+            author_label_size = author_font_size
+            max_author_width = (inner_w - 2 * padding_x) * 0.95
+            author_width = c.stringWidth(author_text, author_font_name, author_label_size)
+            if author_width > max_author_width and author_width > 0:
+                scale = max_author_width / author_width
+                author_label_size = max(author_font_size * scale, 3.0)
+            c.setFont(author_font_name, author_label_size)
             author_x = box_x + inner_w - padding_x
             # Move the author label slightly further down within the inner box to
             # visually separate it from the main text.
