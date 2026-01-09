@@ -481,5 +481,4 @@ if __name__ == "__main__":
     # example: draw_labels(output_pdf="output/family1.pdf", csv_path="data/Versuch_Python.csv")
     # -> creates a pdf file called "family1.pdf" in the "output" folder 
     # with the labels from the csv file "Versuch_Python.csv" in the "data" folder
-
     draw_labels(output_pdf="output/Etiketten_Cassidinae.pdf", csv_path="data/Cassidinae_Python_cleaned.csv")

@@ -20,6 +20,14 @@ poetry run python src/create_pdf.py
 
 This will create an `output.pdf` file in the current directory.
 
+Generate the Unit Tray labels with the museum layout by running:
+
+```bash
+poetry run python src/create_unit_tray_labels.py \
+  --csv data/Cassidinae_Python_cleaned.csv \
+  --output output/UnitTray_Labels.pdf
+```
+
 ## Dependencies
 
 - Python ^3.9
